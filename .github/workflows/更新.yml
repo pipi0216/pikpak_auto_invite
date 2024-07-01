@@ -1,0 +1,38 @@
+name: Sync Template
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Template Repository
+        uses: actions/checkout@v2
+        with:
+          repository: 你的用户名/模板仓库
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main
+
+      - name: Sync Repositories
+        run: |
+          REPOS=(
+            "你的用户名/目标仓库1"
+            "你的用户名/目标仓库2"
+            "你的用户名/目标仓库3"
+            # 继续添加其他仓库
+          )
+          for REPO in "${REPOS[@]}"; do
+            git clone https://github.com/${REPO}.git
+            cd $(basename "$REPO")
+            git remote add template https://github.com/你的用户名/模板仓库.git
+            git fetch template
+            git merge template/main
+            git push origin main
+            cd ..
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
